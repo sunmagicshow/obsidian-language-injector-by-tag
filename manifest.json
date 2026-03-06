@@ -1,5 +1,5 @@
 {
-  "id": "obsidian-language-injector",
+  "id": "language-injector",
   "name": "Language Injector",
   "version": "1.0.0",
   "description": "Inject language mark into code blocks with property.",
