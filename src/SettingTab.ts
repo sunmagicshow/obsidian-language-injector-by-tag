@@ -1,12 +1,12 @@
 import {Setting, PluginSettingTab, App} from 'obsidian';
 import {i18n} from "./i18n";
-import LanguageInjectorByTagPlugin from "./main";
+import LanguageInjector from "./main";
 
 
 export class SettingTab extends PluginSettingTab {
-    private readonly plugin: LanguageInjectorByTagPlugin;
+    private readonly plugin: LanguageInjector;
 
-    constructor(app: App, plugin: LanguageInjectorByTagPlugin) {
+    constructor(app: App, plugin: LanguageInjector) {
         super(app, plugin);
         this.plugin = plugin;
     }
@@ -23,7 +23,7 @@ export class SettingTab extends PluginSettingTab {
                 .setValue(this.plugin.settings.customLanguageProperty)
                 .onChange(async (value) => {
                     this.plugin.settings.customLanguageProperty = value;
-                    await this.plugin.saveSettings();
+                    await this.plugin.saveData(this.plugin.settings);
                 })
             );
 
@@ -34,7 +34,7 @@ export class SettingTab extends PluginSettingTab {
                     .setValue(this.plugin.settings.isReplace)
                     .onChange(async (value: boolean) => {
                         this.plugin.settings.isReplace = value;
-                        await this.plugin.saveSettings();
+                        await this.plugin.saveData(this.plugin.settings);
                     });
             });
     }
