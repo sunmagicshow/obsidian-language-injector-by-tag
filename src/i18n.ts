@@ -3,10 +3,13 @@ import {getLanguage} from 'obsidian';
 export interface LangPack {
     settings: {
         languageProperty: string;
-        isReplace: string;
+        defaultLanguage: string;
+        replaceNote: string;
 
     },
     general: {
+        insert_language_property: string;
+        replace_all_languages: string;
         plugin_unloaded: string;
         no_active_file: string;
         already_exists: string;
@@ -19,9 +22,13 @@ export interface LangPack {
 const zh: LangPack = {
     settings: {
         languageProperty: '属性名称',
-        isReplace: '是否替换原代码标记',
+        defaultLanguage: '默认语言',
+        replaceNote: '提示：如需替换本文档所有代码块语言，请在\'快捷键\' 设置中绑定按键。',
+
     },
     general: {
+        insert_language_property: '插入语言属性',
+        replace_all_languages: '替换本文档所有代码块语言',
         plugin_unloaded: '插件已卸载',
         no_active_file: '请先打开一个 Markdown 文件',
         already_exists: '属性 {propertyKey} 已经存在',
@@ -33,10 +40,13 @@ const zh: LangPack = {
 const en: LangPack = {
     settings: {
         languageProperty: 'Property Name',
-        isReplace: 'Is replace original language marker',
+        defaultLanguage: 'Default Language',
+        replaceNote: 'Note: If you want to replace all code block languages, please bind the key in the "Shortcuts" settings.',
 
     },
     general: {
+        insert_language_property: 'Insert language property',
+        replace_all_languages: 'Replace all code block languages in this document',
         plugin_unloaded: 'Plugin unloaded',
         no_active_file: 'Please open a Markdown file first',
         already_exists: 'Property {propertyKey} already exists',

@@ -26,16 +26,20 @@ export class SettingTab extends PluginSettingTab {
                     await this.plugin.saveData(this.plugin.settings);
                 })
             );
+        new Setting(this.containerEl)
+            .setName(i18n.t.settings.defaultLanguage)
+            .addText(text => text
+                .setPlaceholder('Python')
+                .setValue(this.plugin.settings.defaulteLanguage)
+                .onChange(async (value) => {
+                    this.plugin.settings.defaulteLanguage = value;
+                    await this.plugin.saveData(this.plugin.settings);
+                })
+            );
 
-        new Setting(containerEl)
-            .setName(i18n.t.settings.isReplace)
-            .addToggle(toggle => {
-                return toggle
-                    .setValue(this.plugin.settings.isReplace)
-                    .onChange(async (value: boolean) => {
-                        this.plugin.settings.isReplace = value;
-                        await this.plugin.saveData(this.plugin.settings);
-                    });
-            });
+        containerEl.createEl("p", {
+            text: i18n.t.settings.replaceNote,
+            cls: "setting-item-description"
+        });
     }
 }

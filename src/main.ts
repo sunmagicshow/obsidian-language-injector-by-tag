@@ -15,18 +15,28 @@ export default class LanguageInjectorByTagPlugin extends Plugin {
 
         this.addSettingTab(new SettingTab(this.app, this));
 
-
+        // 事件监听：依然保持自动处理（仅填充空白）
         this.registerEvent(this.app.vault.on('modify', (file) => {
-            void this.handleFileModify(file);
+            void this.handleFileModify(file, false); // 自动修改默认不强制替换
         }));
-        // 注册命令
 
         this.addCommand({
-            id: 'insert-language-property-to-frontmatter',
-            name: '插入语言属性到 YAML 前置区',
-            callback: this.insertLanguagePropertyToFrontmatter.bind(this),
+            id: 'insert-language-property',
+            name: i18n.t.general.insert_language_property,
+            callback: () => {
+                void this.insertLanguagePropertyToFrontmatter();
+            },
         });
 
+        this.addCommand({
+            id: 'force-replace-language-tags',
+            name: i18n.t.general.replace_all_languages,
+            callback: () => {
+                const activeFile = this.app.workspace.getActiveFile();
+                if (activeFile)
+                    void this.handleFileModify(activeFile, true);
+            },
+        });
     }
 
 
@@ -47,20 +57,20 @@ export default class LanguageInjectorByTagPlugin extends Plugin {
         try {
             await this.app.fileManager.processFrontMatter(activeFile, (frontmatter) => {
                 const propertyKey = this.settings.customLanguageProperty;
+                const defaultLangValue = this.settings.defaulteLanguage;
 
-                // 如果属性已存在且设置了不覆盖，则跳过
-                if (propertyKey in frontmatter && !this.settings.isReplace) {
+                if (propertyKey in frontmatter) {
                     new Notice(i18n.t.general.already_exists.replace('{propertyKey}', propertyKey));
                     return;
                 }
-                frontmatter[propertyKey] = "";
+                frontmatter[propertyKey] = defaultLangValue || "";
             });
         } catch {
             new Notice(i18n.t.general.failed_to_insert_property);
         }
     }
 
-    private async handleFileModify(file: TAbstractFile) {
+    private async handleFileModify(file: TAbstractFile, forceReplace: boolean = false) {
         //  非 md 文件跳过
         if (!(file instanceof TFile) || file.extension !== 'md') return;
         if (this.isProcessing) return;
@@ -76,13 +86,13 @@ export default class LanguageInjectorByTagPlugin extends Plugin {
 
             if (!defaultLang) return;
 
-            const newContent = this.updateCodeBlocks(content, defaultLang);
-            // 4. 只有内容真的变化且非空时才修改（避免空修改触发循环）
+            const newContent = this.updateCodeBlocks(content, defaultLang, forceReplace);
+            // 只有内容真的变化且非空时才修改
             if (newContent && newContent !== content) {
                 await this.app.vault.modify(file, newContent);
             }
         } finally {
-            // 5. 无论是否出错，都标记为处理完成
+            // 无论是否出错，都标记为处理完成
             this.isProcessing = false;
         }
     }
@@ -100,18 +110,16 @@ export default class LanguageInjectorByTagPlugin extends Plugin {
         }
     }
 
-    updateCodeBlocks(content: string, defaultLanguage: string): string {
+    updateCodeBlocks(content: string, defaultLanguage: string, forceReplace: boolean): string {
         const codeBlockRegex = /```([^\n]*)\n([\s\S]*?)\n```/g;
 
         return content.replace(codeBlockRegex, (match, language, code) => {
             const trimmedLanguage = language.trim();
 
-            if (this.settings.isReplace) {
+            if (forceReplace || trimmedLanguage === '') {
                 return `\`\`\`${defaultLanguage}\n${code.trimEnd()}\n\`\`\``;
             } else {
-                return trimmedLanguage === ''
-                    ? `\`\`\`${defaultLanguage}\n${code.trimEnd()}\n\`\`\``
-                    : match;
+                return match;
             }
         });
     }
