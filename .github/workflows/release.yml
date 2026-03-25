@@ -1,0 +1,47 @@
+name: Release Obsidian plugin (GitHub)
+
+on:
+    push:
+        tags:
+            - '*'
+
+jobs:
+    build-and-release:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+
+        steps:
+            -   name: Checkout
+                uses: actions/checkout@v6
+                with:
+                    fetch-depth: 0                  #自动获取所有历史提交
+
+            -   name: Install pnpm
+                uses: pnpm/action-setup@v5
+                with:
+                    version: 10
+
+            -   name: Setup Node.js
+                uses: actions/setup-node@v6
+                with:
+                    node-version: "24.x"
+                    cache: 'pnpm'
+
+            -   name: Install dependencies
+                run: pnpm install --frozen-lockfile
+
+            -   name: Build
+                run: pnpm run build
+
+            -   name: Release
+                env:
+                    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                run: |
+                    tag="${GITHUB_REF#refs/tags/}"
+
+                    gh release create "$tag" \
+                      --title="$tag" \
+                      --generate-notes \
+                      dist/main.js \
+                      dist/manifest.json
