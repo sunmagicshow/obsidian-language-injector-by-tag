@@ -13,7 +13,7 @@ await build({
   external: ['fs', 'path', 'electron', 'obsidian'],
   format: 'cjs',
   minify: false,
-  sourcemap: true,
+  sourcemap: false,
   treeShaking: true,
   legalComments: 'none',
 });
